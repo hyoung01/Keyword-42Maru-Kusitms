@@ -30,10 +30,13 @@ class Extract(Resource):
         cur.execute("SELECT content FROM article WHERE article_id = %s", [article_id])
         # article.content 읽어오기
         rows = cur.fetchall()
-
         content = rows[0]
+        cur.close()
+
         keyword = Keyword()
         keyword_list = keyword.get_keyword(content)
+        cur = mysql.connection.cursor()
+
         print(keyword_list)
 
         for tag in keyword_list:
@@ -54,7 +57,6 @@ class Extract(Resource):
 
         mysql.connection.commit()
         cur.close()
-        mysql.connection.close()
 
         # Flask에서 제공하는 json변환 함수
         return jsonify(rows[0])
@@ -70,18 +72,20 @@ class MakeWordCloud(Resource):
         cur.execute("SELECT content FROM article WHERE article_id = %s", [article_id])
         # article.content 읽어오기
         rows = cur.fetchone()
-
         data = rows[0]
+        cur.close()
+
+
         print(data)
         wordcloud = TagCloud()
         wordcloud.make_wordcloud(data, article_id)
 
         binary_image = convertToBinaryData(str(article_id)+'.jpg')
 
+        cur = mysql.connection.cursor()
         cur.execute("UPDATE article SET cloud_image = %s WHERE article_id = %s", [binary_image, article_id])
         mysql.connection.commit()
         cur.close()
-        mysql.connection.close()
 
         return jsonify({"success": True})
 
