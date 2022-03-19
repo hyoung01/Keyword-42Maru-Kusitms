@@ -51,8 +51,10 @@ class Extract(Resource):
             if len(articleTagRows) == 0:
                 cur.execute("INSERT INTO article_tag (article_id, tag_id) VALUES (%s, %s)", [article_id, tag_id])
 
+
         mysql.connection.commit()
         cur.close()
+        mysql.connection.close()
 
         # Flask에서 제공하는 json변환 함수
         return jsonify(rows[0])
@@ -79,6 +81,7 @@ class MakeWordCloud(Resource):
         cur.execute("UPDATE article SET cloud_image = %s WHERE article_id = %s", [binary_image, article_id])
         mysql.connection.commit()
         cur.close()
+        mysql.connection.close()
 
         return jsonify({"success": True})
 
